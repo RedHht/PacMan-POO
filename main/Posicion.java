@@ -10,7 +10,6 @@ public class Posicion {
 
         double distanciaX = Math.abs(this.x - other.getX());
         double distanciaY = Math.abs(this.y - other.getY());
-        
         double[] vectorDistancia = {distanciaX, distanciaY};
         return vectorDistancia;
  }  
