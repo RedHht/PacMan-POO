@@ -1,4 +1,4 @@
-
+package modelo;
 
 public enum EstadoFantasma {
     NORMAL, 
