@@ -38,6 +38,7 @@ public class PartidaTest {
         probarRecorridoLargo();
         probarPausa();
         probarEstadosDelFantasma();
+        probarPersecucionFantasma();
         probarColisiones();
         probarComerFantasma();
         probarVictoria();
@@ -145,6 +146,18 @@ public class PartidaTest {
         verificar(fantasma.estaNormal(), "El fantasma no se recupero al llegar al origen");
         verificar(fantasma.getPosicion().equals(new Posicion(3, 3)),
                 "El fantasma no regreso a su origen");
+    }
+
+    private static void probarPersecucionFantasma() {
+        Laberinto laberinto = new Laberinto();
+        Fantasma fantasma = new Fantasma(new Posicion(3, 5));
+        Posicion pacMan = new Posicion(5, 8);
+
+        for (int i = 0; i < 20 && !fantasma.getPosicion().equals(pacMan); i++) {
+            fantasma.actualizar(laberinto, pacMan, 0.25);
+        }
+        verificar(fantasma.getPosicion().equals(pacMan),
+                "El fantasma no encontro el camino hacia Pac-Man");
     }
 
     private static void probarColisiones() {

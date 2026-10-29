@@ -84,14 +84,10 @@ public class Fantasma extends Personaje {
         }
 
         Direccion elegida = disponibles.get(0);
-        double menorDistancia = Double.MAX_VALUE;
+        int menorDistancia = Integer.MAX_VALUE;
         for (Direccion direccion : disponibles) {
             Posicion siguiente = getPosicion().avanzar(direccion);
-            // Para perseguir alcanza con comparar la distancia directa.
-            // Al regresar al origen sí buscamos un camino entre las paredes.
-            double distancia = estaRegresando()
-                    ? laberinto.distanciaMinima(siguiente, objetivo)
-                    : siguiente.distanciaA(objetivo);
+            int distancia = laberinto.distanciaMinima(siguiente, objetivo);
             if (distancia < menorDistancia) {
                 menorDistancia = distancia;
                 elegida = direccion;
