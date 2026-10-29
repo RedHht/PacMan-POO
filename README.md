@@ -18,6 +18,9 @@ dependen de bibliotecas externas.
 expresa en segundos. Los personajes avanzan de forma continua a cuatro celdas
 por segundo, usando posiciones decimales. Cada personaje administra su movimiento
 y aplica los giros al alcanzar el centro de una celda.
+Pac-Man consume los puntos al llegar al centro de su celda. Una colision ocurre
+cuando Pac-Man y un fantasma ocupan la misma celda o intercambian celdas durante
+una actualizacion.
 El estado se consulta mediante
 `getPartida()`, sus getters y `getLaberinto()`.
 

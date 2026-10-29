@@ -9,9 +9,9 @@ public class Fantasma extends Personaje {
     private final Random aleatorio;
     private Posicion objetivoPacMan;
 
-    public Fantasma(Posicion origen, Random aleatorio) {
+    public Fantasma(Posicion origen) {
         super(origen);
-        this.aleatorio = aleatorio;
+        this.aleatorio = new Random();
     }
 
     public EstadoFantasma getEstado() {
@@ -57,9 +57,6 @@ public class Fantasma extends Personaje {
         actualizarTiempo(deltaTiempo);
         objetivoPacMan = new Posicion(Math.round(posicionPacMan.getX()),
                 Math.round(posicionPacMan.getY()));
-        if (!laberinto.esTransitable(objetivoPacMan)) {
-            objetivoPacMan = getPosicionInicial();
-        }
 
         if (estaRegresando() && getPosicion().equals(getPosicionInicial())) {
             estado = EstadoFantasma.NORMAL;
@@ -87,10 +84,14 @@ public class Fantasma extends Personaje {
         }
 
         Direccion elegida = disponibles.get(0);
-        int menorDistancia = Integer.MAX_VALUE;
+        double menorDistancia = Double.MAX_VALUE;
         for (Direccion direccion : disponibles) {
             Posicion siguiente = getPosicion().avanzar(direccion);
-            int distancia = laberinto.distanciaMinima(siguiente, objetivo);
+            // Para perseguir alcanza con comparar la distancia directa.
+            // Al regresar al origen sí buscamos un camino entre las paredes.
+            double distancia = estaRegresando()
+                    ? laberinto.distanciaMinima(siguiente, objetivo)
+                    : siguiente.distanciaA(objetivo);
             if (distancia < menorDistancia) {
                 menorDistancia = distancia;
                 elegida = direccion;

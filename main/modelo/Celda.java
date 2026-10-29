@@ -19,9 +19,6 @@ public class Celda {
     }
 
     void colocarPunto(Punto punto) {
-        if (!transitable) {
-            throw new IllegalStateException("Una pared no puede contener puntos");
-        }
         this.punto = punto;
     }
 

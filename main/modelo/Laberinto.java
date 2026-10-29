@@ -3,8 +3,10 @@ package modelo;
 import java.util.ArrayList;
 import java.util.List;
 
-/** '#' es pared, '.' es punto comun y 'o' es superpunto. */
+
 public class Laberinto {
+
+    // NOTA: En este mapa un "#" es una pared, un "." es un punto común y un "o" es un super punto
     private static final String[] MAPA_PREDETERMINADO = {
         "###########",
         "#o..#....o#",
@@ -27,21 +29,11 @@ public class Laberinto {
     }
 
     public Laberinto(String... filas) {
-        if (filas.length < 5 || filas[0] == null || filas[0].length() < 5) {
-            throw new IllegalArgumentException("El mapa debe tener al menos 5 filas y columnas");
-        }
-
         int ancho = filas[0].length();
         celdas = new Celda[filas.length][ancho];
         for (int y = 0; y < filas.length; y++) {
-            if (filas[y] == null || filas[y].length() != ancho) {
-                throw new IllegalArgumentException("Todas las filas deben tener el mismo ancho");
-            }
             for (int x = 0; x < ancho; x++) {
                 char simbolo = filas[y].charAt(x);
-                if (simbolo != '#' && simbolo != '.' && simbolo != 'o') {
-                    throw new IllegalArgumentException("Use solamente '#', '.' y 'o'");
-                }
                 Celda celda = new Celda(simbolo != '#');
                 if (simbolo == '.') {
                     celda.colocarPunto(new PuntoComun());
@@ -95,7 +87,7 @@ public class Laberinto {
         return disponibles;
     }
 
-    // Distancia minima por los pasillos, calculada con BFS.
+    // Distancia minima de un punto a otro calculado con un algoritmo BFS
     public int distanciaMinima(Posicion origen, Posicion destino) {
         if (!esTransitable(origen) || !esTransitable(destino)) {
             return Integer.MAX_VALUE;

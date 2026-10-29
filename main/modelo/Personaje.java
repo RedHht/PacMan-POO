@@ -30,6 +30,7 @@ public abstract class Personaje {
         direccionActual = direccion;
     }
 
+    // Abstracta para que cada implementación de Personaje pueda decidir como direccionar
     protected abstract Direccion elegirDireccion(Laberinto laberinto);
 
     public double tiempoHastaCentro() {
@@ -40,10 +41,8 @@ public abstract class Personaje {
     }
 
     protected void desplazar(Laberinto laberinto, double deltaTiempo) {
-        if (deltaTiempo == 0) {
-            return;
-        }
 
+        // Si no tengo destino elijo uno nuevo basado en la dirección
         if (destino == null) {
             Direccion direccion = elegirDireccion(laberinto);
             if (!laberinto.puedeMover(posicion, direccion)) {
@@ -55,32 +54,32 @@ public abstract class Personaje {
 
         double avance = VELOCIDAD * deltaTiempo;
         double distancia = posicion.distanciaA(destino);
-        if (avance >= distancia) {
+
+        // Si ya llego a destino, coloca al personaje exactamente en el centro.
+        if (avance >= distancia - 0.0000000001) {
             cambiarPosicion(destino);
             destino = null;
             return;
         }
 
+        // Avanza la nueva posición
         double x = posicion.getX();
         double y = posicion.getY();
         switch (direccionActual) {
             case ARRIBA:
-                y = Math.max(y - avance, destino.getY());
+                y -= avance;
                 break;
             case ABAJO:
-                y = Math.min(y + avance, destino.getY());
+                y += avance;
                 break;
             case IZQUIERDA:
-                x = Math.max(x - avance, destino.getX());
+                x -= avance;
                 break;
             case DERECHA:
-                x = Math.min(x + avance, destino.getX());
+                x += avance;
                 break;
         }
         cambiarPosicion(new Posicion(x, y));
-        if (posicion.equals(destino)) {
-            destino = null;
-        }
     }
 
     public void volverPosicionInicial() {
