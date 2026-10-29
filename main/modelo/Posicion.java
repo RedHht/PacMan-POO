@@ -26,7 +26,6 @@ public final class Posicion {
         }
     }
 
-    // Suma de las distancias horizontal y vertical.
     public double distanciaA(Posicion otra) {
         return Math.abs(x - otra.x) + Math.abs(y - otra.y);
     }

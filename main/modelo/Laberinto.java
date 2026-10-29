@@ -95,12 +95,11 @@ public class Laberinto {
         return disponibles;
     }
 
-    // Distancia hasta una dirección utilizando BFS como si fuera un grafo
+    // Distancia minima por los pasillos, calculada con BFS.
     public int distanciaMinima(Posicion origen, Posicion destino) {
         if (!esTransitable(origen) || !esTransitable(destino)) {
             return Integer.MAX_VALUE;
         }
-        // Revisar primero las celdas cercanas y luego las mas lejanas.
         List<Posicion> pendientes = new ArrayList<>();
         boolean[][] visitadas = new boolean[getAlto()][getAncho()];
         int[][] distancias = new int[getAlto()][getAncho()];

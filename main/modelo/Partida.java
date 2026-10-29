@@ -6,8 +6,6 @@ import java.util.Random;
 
 public class Partida {
     public static final double DURACION_ASUSTADO = 8.0;
-    // A 4 celdas por segundo, cada personaje avanza como maximo 0.04 por intervalo.
-    // Esto permite detectar el contacto sin calcular el cruce de los recorridos.
     private static final double MAX_INTERVALO = 0.01;
     private static final double DISTANCIA_COLISION = 0.3;
     private static final double DISTANCIA_CONSUMO = 0.3;
@@ -93,8 +91,7 @@ public class Partida {
         }
         double restante = deltaTiempo;
 
-        // Para no perder colisiones intermedias, dividimos el tiempo en "tramos"
-        while (restante > 0.0000000001 && estaEnCurso()) {
+        while (restante > 0 && estaEnCurso()) {
             double tramo = Math.min(restante, MAX_INTERVALO);
 
             tramo = Math.min(tramo, pacMan.tiempoHastaCentro());
@@ -140,31 +137,29 @@ public class Partida {
             }
     }
 
-    // NOTA: Devuelve true si Pac-Man pierde una vida.
+    // Devuelve true si Pac-Man pierde una vida.
     private boolean resolverColision(Fantasma fantasma) {
         double distancia = pacMan.getPosicion().distanciaA(fantasma.getPosicion());
 
-        if (distancia > DISTANCIA_COLISION) { // No hay colisión
+        if (distancia > DISTANCIA_COLISION) {
             return false;
         }
 
-        // Hay colisión pero no se pierde vida
-        if (fantasma.estaAsustado()) {  // Con un fantasma asustado
+        if (fantasma.estaAsustado()) {
             fantasma.serComido();
             puntaje += 200;
             return false;
         }
-        if (fantasma.estaRegresando()) { // Con un par de ojos
+        if (fantasma.estaRegresando()) {
             return false;
         }
 
-        // Hay colisión con perdida de vida
         vidas--;
 
-        if (vidas == 0) { // Si no quedan vidas, perdio
+        if (vidas == 0) {
             estado = EstadoPartida.PERDIDA;
         }
-        else { // Si quedan vidas volvemos a posiciones iniciales
+        else {
             pacMan.volverPosicionInicial();
             for (Fantasma otro : fantasmas) {
                 otro.volverPosicionInicial();

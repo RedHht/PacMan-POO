@@ -7,7 +7,6 @@ import modelo.Fantasma;
 import modelo.Laberinto;
 import modelo.PacMan;
 import modelo.Partida;
-import modelo.Personaje;
 import modelo.Posicion;
 import modelo.PuntoComun;
 import modelo.SuperPunto;
@@ -27,17 +26,51 @@ public class PartidaTest {
     }
 
     public static void main(String[] args) {
+        puntosDelMapa();
         inicioPuntosYMovimiento();
+        consumoConMargen();
+        puntosDuranteRecorrido();
+        movimientoYGiro();
+        llegadaAlCentro();
+        tiempoDividido();
         pausaYTemporizador();
+        finEstadoAsustado();
+        comerFantasma();
+        recuperacionEnOrigen();
+        regresoAlOrigen();
+        colisionDeFrente();
         colisionYDerrota();
-        fantasmaComidoYRegreso();
         victoria();
         controlador();
-        colisionDeFrente();
-        movimientoContinuo();
-        consumoConMargen();
-        puntosDelMapa();
         System.out.println("Todas las pruebas pasaron");
+    }
+
+    private static void finEstadoAsustado() {
+        Laberinto laberinto = new Laberinto(MAPA);
+        Fantasma fantasma = new Fantasma(new Posicion(3, 3), new Random(1));
+        fantasma.asustar(8);
+        for (int i = 0; i < 799; i++) {
+            fantasma.actualizar(laberinto, new Posicion(1, 1), 0.01);
+        }
+        verificar(fantasma.estaAsustado(), "No debe terminar el estado asustado antes de tiempo");
+        fantasma.actualizar(laberinto, new Posicion(1, 1), 0.01);
+        fantasma.actualizar(laberinto, new Posicion(1, 1), 0.01);
+        verificar(fantasma.estaNormal() && fantasma.getTiempoAsustadoRestante() == 0,
+                "El fantasma no volvio al estado normal");
+
+    }
+
+    private static void llegadaAlCentro() {
+        Laberinto laberinto = new Laberinto(MAPA);
+        PacMan pacMan = new PacMan(new Posicion(1, 1));
+        pacMan.solicitarDireccion(Direccion.DERECHA);
+        pacMan.actualizar(laberinto, 0.249999);
+        verificar(pacMan.getPosicion().getX() < 2,
+                "No debe adelantar la llegada al centro");
+        pacMan.actualizar(laberinto, 0.000001);
+        pacMan.actualizar(laberinto, 0.01);
+        verificar(pacMan.getPosicion().equals(new Posicion(2, 1)),
+                "Pac-Man no quedo en el centro de la celda");
     }
 
     private static void puntosDelMapa() {
@@ -51,48 +84,48 @@ public class PartidaTest {
     }
 
     private static void consumoConMargen() {
-        Partida partida = nuevaPartida(new Posicion(1, 1), new Posicion(3, 3));
+        Partida partida = crearPartida(new Posicion(1, 1), new Posicion(3, 3));
         Posicion punto = new Posicion(2, 1);
         partida.moverPacMan(Direccion.DERECHA);
         partida.actualizar(0.17);
         verificar(partida.getLaberinto().obtenerCelda(punto).tienePunto(),
-                "No debe consumir el punto a mas de 0.3 celdas");
+                "Comio el punto antes de entrar en el radio de 0.3");
         partida.actualizar(0.01);
         verificar(!partida.getLaberinto().obtenerCelda(punto).tienePunto(),
-                "Debe consumir el punto al entrar en el margen, antes de llegar al centro");
+                "No comio el punto al acercarse a su centro");
         int puntaje = partida.getPuntaje();
         int restantes = partida.getLaberinto().getPuntosRestantes();
         partida.actualizar(0.01);
         verificar(partida.getPuntaje() == puntaje
                 && partida.getLaberinto().getPuntosRestantes() == restantes,
-                "No debe consumir el mismo punto dos veces");
+                "El mismo punto se conto dos veces");
     }
 
-    private static Partida nuevaPartida(Posicion pacMan, Posicion fantasma) {
+    private static Partida crearPartida(Posicion pacMan, Posicion fantasma) {
         return new Partida(new Laberinto(MAPA), pacMan,
                 List.of(fantasma, fantasma, fantasma, fantasma), new Random(1));
     }
 
     private static void inicioPuntosYMovimiento() {
-        Partida partida = nuevaPartida(new Posicion(1, 1), new Posicion(3, 3));
+        Partida partida = crearPartida(new Posicion(1, 1), new Posicion(3, 3));
         verificar(partida.getVidas() == 3 && partida.getPuntaje() == 50,
-                "El inicio debe otorgar tres vidas y consumir el super punto inicial");
+                "Se esperaban 3 vidas y 50 puntos al empezar sobre un superpunto");
         verificar(partida.getLaberinto().getPuntosRestantes() == 8,
-                "El punto consumido debe desaparecer");
+                "El punto inicial sigue en el mapa");
         for (Fantasma fantasma : partida.getFantasmas()) {
-            verificar(fantasma.estaAsustado(), "El super punto debe asustar a cada fantasma");
+            verificar(fantasma.estaAsustado(), "Un fantasma no quedo asustado");
         }
         partida.moverPacMan(Direccion.DERECHA);
-        partida.actualizar((1.0 / Personaje.VELOCIDAD));
-        verificar(partida.getPacMan().getPosicion().equals(new Posicion(2, 1)),
-                "Pac-Man debe avanzar sin recibir una orden por cada paso");
-        verificar(partida.getPuntaje() >= 60, "Un punto comun suma diez");
+        partida.actualizar(0.25);
+        verificar(partida.getPacMan().getPosicion().distanciaA(new Posicion(2, 1)) < 0.000000001,
+                "Pac-Man no avanzo una celda");
+        verificar(partida.getPuntaje() == 60, "El punto comun no sumo 10 puntos");
         verificar(!partida.getLaberinto().puedeMover(new Posicion(1, 1), Direccion.IZQUIERDA),
-                "Una pared debe bloquear el movimiento");
+                "Se permite avanzar hacia una pared");
     }
 
     private static void pausaYTemporizador() {
-        Partida partida = nuevaPartida(new Posicion(1, 1), new Posicion(3, 3));
+        Partida partida = crearPartida(new Posicion(1, 1), new Posicion(3, 3));
         double restante = partida.getFantasmas().get(0).getTiempoAsustadoRestante();
         partida.pausar();
         partida.actualizar(20);
@@ -106,25 +139,30 @@ public class PartidaTest {
     }
 
     private static void colisionYDerrota() {
-        Partida partida = nuevaPartida(new Posicion(2, 2), new Posicion(2, 3));
-        partida.actualizar((1.0 / Personaje.VELOCIDAD));
+        Partida partida = crearPartida(new Posicion(2, 2), new Posicion(2, 3));
+        partida.actualizar(0.25);
         verificar(partida.getVidas() == 2
                 && partida.getPacMan().getPosicion().equals(new Posicion(2, 2)),
                 "La colision normal debe descontar una vida y reiniciar posiciones");
         for (Fantasma fantasma : partida.getFantasmas()) {
             verificar(fantasma.estaNormal(), "La colision debe restablecer cada estado");
         }
-        partida.actualizar(2 * (1.0 / Personaje.VELOCIDAD));
+        partida.actualizar(2 * 0.25);
         verificar(partida.getEstado() == EstadoPartida.PERDIDA,
-                "La tercera colision debe finalizar la partida");
+                "No hubo derrota al perder las 3 vidas");
     }
 
-    private static void fantasmaComidoYRegreso() {
-        Partida partida = nuevaPartida(new Posicion(1, 1), new Posicion(2, 1));
-        partida.moverPacMan(Direccion.DERECHA);
-        partida.actualizar((1.0 / Personaje.VELOCIDAD));
-        verificar(partida.getPuntaje() >= 260 && partida.getVidas() == 3,
-                "Comer un fantasma asustado debe sumar 200 sin restar vidas");
+    private static void comerFantasma() {
+        Partida partida = new Partida(new Laberinto(MAPA), new Posicion(1, 1),
+                List.of(new Posicion(1, 1), new Posicion(3, 3),
+                        new Posicion(3, 3), new Posicion(3, 3)), new Random(1));
+        int puntajeInicial = partida.getPuntaje();
+        partida.actualizar(0.01);
+        verificar(partida.getPuntaje() == puntajeInicial + 200, "El fantasma comido no sumo 200 puntos");
+        verificar(partida.getVidas() == 3, "Comer un fantasma desconto una vida");
+    }
+
+    private static void recuperacionEnOrigen() {
         Fantasma fantasma = new Fantasma(new Posicion(2, 1), new Random(1));
         fantasma.asustar(8);
         fantasma.serComido();
@@ -132,13 +170,16 @@ public class PartidaTest {
         verificar(fantasma.estaNormal() && fantasma.getPosicion().equals(new Posicion(2, 1)),
                 "Un fantasma comido en su origen debe recuperarse sin desplazarse");
 
+    }
+
+    private static void regresoAlOrigen() {
         Laberinto laberinto = new Laberinto(MAPA);
         Fantasma retorno = new Fantasma(new Posicion(3, 3), new Random(1));
-        retorno.actualizar(laberinto, new Posicion(1, 1), 1.0 / Personaje.VELOCIDAD);
+        retorno.actualizar(laberinto, new Posicion(1, 1), 0.25);
         retorno.asustar(8);
         retorno.serComido();
         verificar(retorno.estaRegresando(), "El fantasma comido debe regresar al origen");
-        retorno.actualizar(laberinto, new Posicion(1, 1), 1.0 / Personaje.VELOCIDAD);
+        retorno.actualizar(laberinto, new Posicion(1, 1), 0.25);
         verificar(retorno.estaNormal()
                 && retorno.getPosicion().equals(new Posicion(3, 3)),
                 "Al llegar al origen debe recuperar el estado normal");
@@ -149,31 +190,35 @@ public class PartidaTest {
         Partida partida = new Partida(laberinto, new Posicion(1, 1),
                 List.of(new Posicion(3, 3), new Posicion(3, 3),
                         new Posicion(3, 3), new Posicion(3, 3)), new Random(1));
-        for (int y = 1; y <= 3; y++)
+        for (int y = 1; y <= 3; y++) {
             for (int x = 1; x <= 3; x++) {
                 if (x != 2 || y != 1) {
                     laberinto.retirarPunto(new Posicion(x, y));
                 }
             }
+        }
         partida.moverPacMan(Direccion.DERECHA);
-        partida.actualizar((1.0 / Personaje.VELOCIDAD));
+        partida.actualizar(0.25);
         verificar(partida.getEstado() == EstadoPartida.GANADA
                 && laberinto.getPuntosRestantes() == 0,
                 "Al consumir todos los puntos la partida debe terminar en victoria");
     }
 
-    private static void movimientoContinuo() {
-        Partida recorrido = nuevaPartida(new Posicion(1, 1), new Posicion(3, 3));
+    private static void puntosDuranteRecorrido() {
+        Partida recorrido = crearPartida(new Posicion(1, 1), new Posicion(3, 3));
         recorrido.moverPacMan(Direccion.DERECHA);
         recorrido.actualizar(0.5);
         verificar(!recorrido.getLaberinto().obtenerCelda(new Posicion(2, 1)).tienePunto()
                 && !recorrido.getLaberinto().obtenerCelda(new Posicion(3, 1)).tienePunto(),
-                "Una actualizacion larga debe consumir cada punto del recorrido");
+                "Quedaron puntos sin comer en el recorrido");
         Posicion antes = recorrido.getPacMan().getPosicion();
         recorrido.pausar();
         recorrido.actualizar(1);
         verificar(recorrido.getPacMan().getPosicion().equals(antes),
-                "La pausa debe detener el movimiento continuo");
+                "Pac-Man se movio durante la pausa");
+    }
+
+    private static void movimientoYGiro() {
         Laberinto laberinto = new Laberinto(MAPA);
         PacMan pacMan = new PacMan(new Posicion(1, 1));
         pacMan.solicitarDireccion(Direccion.DERECHA);
@@ -189,14 +234,17 @@ public class PartidaTest {
                 "Debe aplicar el giro solicitado al alcanzar el centro");
         pacMan.actualizar(laberinto, 5);
         verificar(pacMan.getPosicion().equals(new Posicion(2, 2)),
-                "Una llamada debe detenerse en el destino sin pasarlo");
+                "Pac-Man se paso de su destino");
         for (int i = 0; i < 50; i++) {
             pacMan.actualizar(laberinto, 0.01);
         }
         verificar(pacMan.getPosicion().equals(new Posicion(2, 3)),
-                "Las siguientes llamadas deben avanzar y detenerse ante la pared");
-        Partida completa = nuevaPartida(new Posicion(1, 1), new Posicion(3, 3));
-        Partida dividida = nuevaPartida(new Posicion(1, 1), new Posicion(3, 3));
+                "Pac-Man no se detuvo ante la pared");
+    }
+
+    private static void tiempoDividido() {
+        Partida completa = crearPartida(new Posicion(1, 1), new Posicion(3, 3));
+        Partida dividida = crearPartida(new Posicion(1, 1), new Posicion(3, 3));
         completa.moverPacMan(Direccion.DERECHA);
         dividida.moverPacMan(Direccion.DERECHA);
         completa.actualizar(0.35);
@@ -205,11 +253,11 @@ public class PartidaTest {
         }
         verificar(completa.getPacMan().getPosicion().distanciaA(
                 dividida.getPacMan().getPosicion()) < 0.000000001,
-                "Partida debe conservar el desplazamiento al dividir el tiempo");
+                "El desplazamiento cambio al dividir el tiempo");
     }
 
     private static void colisionDeFrente() {
-        Partida partida = nuevaPartida(new Posicion(2, 2), new Posicion(3, 2));
+        Partida partida = crearPartida(new Posicion(2, 2), new Posicion(3, 2));
         partida.moverPacMan(Direccion.DERECHA);
         partida.actualizar(0.1);
         verificar(partida.getVidas() == 2,
@@ -234,6 +282,6 @@ public class PartidaTest {
         controlador.moverPacMan(Direccion.ARRIBA);
         controlador.actualizarPartida(0.01);
         verificar(controlador.getPartida().getPacMan().getPosicion().getY() < inicio.getY(),
-                "El controlador debe delegar la actualizacion hasta el personaje");
+                "El personaje no se movio desde el controlador");
     }
 }

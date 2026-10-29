@@ -3,7 +3,6 @@ package controlador;
 import modelo.Direccion;
 import modelo.Partida;
 
-/** Fachada para la interfaz de usuario y el ciclo de actualización. */
 public final class Controlador {
     private static Controlador instance;
     private Partida partida;

@@ -2,8 +2,6 @@ package modelo;
 
 public abstract class Personaje {
     public static final double VELOCIDAD = 4.0;
-    // Margen para los pequenos errores de calculo con double.
-    private static final double MARGEN_ERROR = 0.0000000001;
     private Posicion destino;
     private Posicion posicion;
     private final Posicion posicionInicial;
@@ -46,7 +44,6 @@ public abstract class Personaje {
             return;
         }
 
-        // Elegir una nueva celda solamente cuando terminamos el recorrido anterior.
         if (destino == null) {
             Direccion direccion = elegirDireccion(laberinto);
             if (!laberinto.puedeMover(posicion, direccion)) {
@@ -58,7 +55,7 @@ public abstract class Personaje {
 
         double avance = VELOCIDAD * deltaTiempo;
         double distancia = posicion.distanciaA(destino);
-        if (avance + MARGEN_ERROR >= distancia) {
+        if (avance >= distancia) {
             cambiarPosicion(destino);
             destino = null;
             return;
@@ -68,19 +65,22 @@ public abstract class Personaje {
         double y = posicion.getY();
         switch (direccionActual) {
             case ARRIBA:
-                y -= avance;
+                y = Math.max(y - avance, destino.getY());
                 break;
             case ABAJO:
-                y += avance;
+                y = Math.min(y + avance, destino.getY());
                 break;
             case IZQUIERDA:
-                x -= avance;
+                x = Math.max(x - avance, destino.getX());
                 break;
             case DERECHA:
-                x += avance;
+                x = Math.min(x + avance, destino.getX());
                 break;
         }
         cambiarPosicion(new Posicion(x, y));
+        if (posicion.equals(destino)) {
+            destino = null;
+        }
     }
 
     public void volverPosicionInicial() {
