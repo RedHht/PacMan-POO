@@ -1,9 +1,12 @@
 package modelo;
 
+import dto.FantasmaDTO;
+
 import java.util.List;
 import java.util.Random;
 
 public class Fantasma extends Personaje {
+
     private EstadoFantasma estado = EstadoFantasma.NORMAL;
     private double tiempoAsustadoRestante;
     private final Random aleatorio;
@@ -12,6 +15,11 @@ public class Fantasma extends Personaje {
     public Fantasma(Posicion origen) {
         super(origen);
         this.aleatorio = new Random();
+    }
+
+    public FantasmaDTO toDTO() {
+        return new FantasmaDTO(getPosicion().getX(), getPosicion().getY(),
+                getDireccionActual(), estado, tiempoAsustadoRestante);
     }
 
     public EstadoFantasma getEstado() {

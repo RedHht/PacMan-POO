@@ -1,5 +1,6 @@
 package controlador;
 
+import dto.PartidaDTO;
 import modelo.Direccion;
 import modelo.Partida;
 
@@ -16,38 +17,47 @@ public final class Controlador {
         return instance;
     }
 
-    public void iniciarPartida() {
+    public PartidaDTO iniciarPartida() {
         if (partida != null && !partida.estaFinalizada()) {
             throw new IllegalStateException("Ya existe una partida activa");
         }
 
         partida = new Partida();
+        return getPartida();
     }
 
-    public Partida getPartida() {
-        return partida;
+    public PartidaDTO getPartida() {
+        if (partida == null) {
+            return null;
+        }
+        return partida.toDTO();
     }
 
-    public void moverPacMan(Direccion direccion) {
+    public PartidaDTO moverPacMan(Direccion direccion) {
         partida.moverPacMan(direccion);
+        return getPartida();
     }
 
-    public void pausarPartida() {
+    public PartidaDTO pausarPartida() {
         partida.pausar();
+        return getPartida();
     }
-    public void reanudarPartida() {
+    public PartidaDTO reanudarPartida() {
         partida.reanudar();
+        return getPartida();
     }
 
-    public void nuevaPartida() {
+    public PartidaDTO nuevaPartida() {
         if (partida == null || !partida.estaFinalizada()) {
             throw new IllegalStateException("Solo se puede reiniciar una partida finalizada");
         }
         partida = new Partida();
+        return getPartida();
     }
 
-    public void actualizarPartida(double deltaTiempo) {
+    public PartidaDTO actualizarPartida(double deltaTiempo) {
         partida.actualizar(deltaTiempo);
+        return getPartida();
     }
 
 }

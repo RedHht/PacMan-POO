@@ -3,7 +3,6 @@ package modelo;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Laberinto {
 
     // NOTA: En este mapa un "#" es una pared, un "." es un punto común y un "o" es un super punto
@@ -47,6 +46,27 @@ public class Laberinto {
         }
     }
 
+    public List<String> getTablero() {
+        List<String> tablero = new ArrayList<>();
+        for (int y = 0; y < getAlto(); y++) {
+            StringBuilder fila = new StringBuilder();
+            for (int x = 0; x < getAncho(); x++) {
+                Celda celda = celdas[y][x];
+                if (!celda.esTransitable()) {
+                    fila.append('#');
+                } else if (!celda.tienePunto()) {
+                    fila.append(' ');
+                } else if (celda.getPunto().obtenerValor() == 50) {
+                    fila.append('o');
+                } else {
+                    fila.append('.');
+                }
+            }
+            tablero.add(fila.toString());
+        }
+        return tablero;
+    }
+
     public int getAncho() {
         return celdas[0].length;
     }
@@ -59,7 +79,9 @@ public class Laberinto {
 
     public Celda obtenerCelda(Posicion posicion) {
         if (!estaAlineado(posicion) || posicion.getY() < 0 || posicion.getY() >= getAlto()
-                || posicion.getX() < 0 || posicion.getX() >= getAncho()) return null;
+                || posicion.getX() < 0 || posicion.getX() >= getAncho()) {
+            return null;
+        }
         return celdas[(int) posicion.getY()][(int) posicion.getX()];
     }
 

@@ -1,9 +1,13 @@
 package modelo;
 
+import dto.PartidaDTO;
+import dto.FantasmaDTO;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Partida {
+
     public static final double DURACION_ASUSTADO = 8.0;
     // Pasos cortos para detectar encuentros mientras los personajes se mueven.
     private static final double MAX_INTERVALO = 0.05;
@@ -33,6 +37,15 @@ public class Partida {
         if (!laberinto.quedanPuntos()) {
             estado = EstadoPartida.GANADA;
         }
+    }
+
+    public PartidaDTO toDTO() {
+        List<FantasmaDTO> datosFantasmas = new ArrayList<>();
+        for (Fantasma fantasma : fantasmas) {
+            datosFantasmas.add(fantasma.toDTO());
+        }
+        return new PartidaDTO(estado, puntaje, vidas, laberinto.getPuntosRestantes(),
+                pacMan.toDTO(), datosFantasmas, laberinto.getTablero());
     }
 
     public Laberinto getLaberinto() {
