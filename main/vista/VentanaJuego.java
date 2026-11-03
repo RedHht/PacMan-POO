@@ -11,7 +11,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class VentanaJuego extends JFrame {
-    private final Controlador controlador;
     private final PanelTablero panel;
     private final Timer timer;
     private final JButton botonReiniciar = new JButton("Volver a jugar");
@@ -24,8 +23,7 @@ public class VentanaJuego extends JFrame {
     public VentanaJuego() {
         super("Pac-Man");
 
-        controlador = Controlador.getInstance();
-        PartidaDTO datos = controlador.iniciarPartida();
+        PartidaDTO datos = Controlador.getInstance().iniciarPartida();
 
         panel = new PanelTablero(datos);
         JPanel juego = new JPanel(new BorderLayout());
@@ -33,18 +31,14 @@ public class VentanaJuego extends JFrame {
         JPanel controles = new JPanel(new BorderLayout(8, 8));
         controles.add(ayuda, BorderLayout.CENTER);
         controles.add(botonReiniciar, BorderLayout.SOUTH);
-        controles.setBackground(new Color(10, 15, 31));
         controles.setBorder(BorderFactory.createEmptyBorder(10, 16, 14, 16));
-        ayuda.setForeground(new Color(193, 203, 225));
-        ayuda.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        estilizarBoton(botonReiniciar);
+
         juego.add(controles, BorderLayout.SOUTH);
         pantallas.add(crearMenu(), "menu");
         pantallas.add(juego, "juego");
         setContentPane(pantallas);
         tarjetas.show(pantallas, "menu");
         botonReiniciar.setEnabled(false);
-        botonReiniciar.setFocusable(false);
         botonReiniciar.addActionListener(e -> reiniciarJuego());
 
         configurarTeclado();
@@ -62,22 +56,21 @@ public class VentanaJuego extends JFrame {
     private JPanel crearMenu() {
         JPanel menu = new JPanel();
         menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
-        menu.setBackground(new Color(7, 10, 23));
         menu.setBorder(BorderFactory.createEmptyBorder(32, 30, 32, 30));
         menu.add(Box.createVerticalGlue());
-        agregarTexto(menu, "P A C - M A N", 38, new Color(255, 220, 67));
+        agregarTexto(menu, "P A C - M A N");
         menu.add(Box.createVerticalStrut(10));
-        agregarTexto(menu, "EL LABERINTO TE ESPERA", 13, new Color(91, 191, 255));
+        agregarTexto(menu, "EL LABERINTO TE ESPERA");
         menu.add(Box.createVerticalStrut(38));
-        agregarTexto(menu, "Comé todos los puntos para ganar.", 16, Color.WHITE);
+        agregarTexto(menu, "Comé todos los puntos para ganar.");
         menu.add(Box.createVerticalStrut(12));
-        agregarTexto(menu, "Flechas  ·  Mover a Pac-Man", 14, Color.LIGHT_GRAY);
-        agregarTexto(menu, "P  ·  Pausar o continuar", 14, Color.LIGHT_GRAY);
+        agregarTexto(menu, "Flechas  ·  Mover a Pac-Man");
+        agregarTexto(menu, "P  ·  Pausar o continuar");
         menu.add(Box.createVerticalStrut(12));
-        agregarTexto(menu, "Los superpuntos asustan a los fantasmas.", 13, Color.LIGHT_GRAY);
+        agregarTexto(menu, "Los superpuntos asustan a los fantasmas.");
         menu.add(Box.createVerticalStrut(32));
         JButton jugar = new JButton("Jugar");
-        estilizarBoton(jugar);
+        jugar.setAlignmentX(Component.CENTER_ALIGNMENT);
         jugar.addActionListener(e -> {
             enMenu = false;
             tarjetas.show(pantallas, "juego");
@@ -86,38 +79,26 @@ public class VentanaJuego extends JFrame {
         menu.add(jugar);
         menu.add(Box.createVerticalStrut(12));
         JButton salir = new JButton("Salir");
-        estilizarBoton(salir);
+        salir.setAlignmentX(Component.CENTER_ALIGNMENT);
         salir.addActionListener(e -> dispose());
         menu.add(salir);
         menu.add(Box.createVerticalGlue());
         return menu;
     }
 
-    private void agregarTexto(JPanel destino, String texto, int tamano, Color color) {
+    private void agregarTexto(JPanel destino, String texto) {
         JLabel etiqueta = new JLabel(texto);
-        etiqueta.setFont(new Font("SansSerif", Font.BOLD, tamano));
-        etiqueta.setForeground(color);
         etiqueta.setAlignmentX(Component.CENTER_ALIGNMENT);
         etiqueta.setHorizontalAlignment(SwingConstants.CENTER);
         etiqueta.setMaximumSize(new Dimension(Integer.MAX_VALUE, etiqueta.getPreferredSize().height + 4));
         destino.add(etiqueta);
     }
 
-    private void estilizarBoton(JButton boton) {
-        boton.setFont(new Font("SansSerif", Font.BOLD, 16));
-        boton.setBackground(new Color(255, 220, 67));
-        boton.setForeground(new Color(12, 18, 35));
-        boton.setFocusPainted(false);
-        boton.setBorder(BorderFactory.createEmptyBorder(10, 28, 10, 28));
-        boton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-    }
-
     private void actualizarJuego() {
-        if (!juegoIniciado || controlador.getPartida().getEstado() != EstadoPartida.EN_CURSO) {
+        if (!juegoIniciado || Controlador.getInstance().getPartida().getEstado() != EstadoPartida.EN_CURSO) {
             return;
         }
-        PartidaDTO datosActualizados = controlador.actualizarPartida(0.04);
+        PartidaDTO datosActualizados = Controlador.getInstance().actualizarPartida(0.04);
         panel.actualizarPartida(datosActualizados);
         if (datosActualizados.getEstado() == EstadoPartida.GANADA
                 || datosActualizados.getEstado() == EstadoPartida.PERDIDA) {
@@ -131,25 +112,25 @@ public class VentanaJuego extends JFrame {
         if (enMenu || !juegoIniciado) {
             return;
         }
-        EstadoPartida estado = controlador.getPartida().getEstado();
+        EstadoPartida estado = Controlador.getInstance().getPartida().getEstado();
         if (estado == EstadoPartida.EN_CURSO) {
             timer.stop();
-            panel.actualizarPartida(controlador.pausarPartida());
+            panel.actualizarPartida(Controlador.getInstance().pausarPartida());
             ayuda.setText("Presioná P para continuar");
         } else if (estado == EstadoPartida.EN_PAUSA) {
-            panel.actualizarPartida(controlador.reanudarPartida());
+            panel.actualizarPartida(Controlador.getInstance().reanudarPartida());
             ayuda.setText("Flechas: mover  |  P: pausar");
             timer.start();
         }
     }
 
     private void reiniciarJuego() {
-        EstadoPartida estado = controlador.getPartida().getEstado();
+        EstadoPartida estado = Controlador.getInstance().getPartida().getEstado();
         if (estado != EstadoPartida.GANADA && estado != EstadoPartida.PERDIDA) {
             return;
         }
         timer.stop();
-        panel.actualizarPartida(controlador.nuevaPartida());
+        panel.actualizarPartida(Controlador.getInstance().nuevaPartida());
         juegoIniciado = false;
         botonReiniciar.setEnabled(false);
         ayuda.setText("Presioná una flecha para empezar");
@@ -188,16 +169,16 @@ public class VentanaJuego extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (enMenu || controlador.getPartida().getEstado() != EstadoPartida.EN_CURSO) {
+                if (enMenu || Controlador.getInstance().getPartida().getEstado() != EstadoPartida.EN_CURSO) {
                     return;
                 }
-                controlador.moverPacMan(direccion);
+                Controlador.getInstance().moverPacMan(direccion);
                 if (!juegoIniciado) {
                     juegoIniciado = true;
                     ayuda.setText("Flechas: mover  |  P: pausar");
                     // Guardar la direccion antes de avanzar evita perder la primera tecla.
                     actualizarJuego();
-                    if (controlador.getPartida().getEstado() == EstadoPartida.EN_CURSO) {
+                    if (Controlador.getInstance().getPartida().getEstado() == EstadoPartida.EN_CURSO) {
                         timer.start();
                     }
                 }

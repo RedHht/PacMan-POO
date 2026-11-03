@@ -4,13 +4,15 @@ import java.util.List;
 import modelo.EstadoPartida;
 
 public class PartidaDTO {
-    private final EstadoPartida estado;
-    private final int puntaje;
-    private final int vidas;
-    private final int puntosRestantes;
-    private final PacManDTO pacMan;
-    private final List<FantasmaDTO> fantasmas;
-    private final List<String> tablero;
+    private EstadoPartida estado;
+    private int puntaje;
+    private int vidas;
+    private int puntosRestantes;
+    private PacManDTO pacMan;
+    private List<FantasmaDTO> fantasmas;
+    private List<String> tablero;
+
+    public PartidaDTO() { }
 
     public PartidaDTO(EstadoPartida estado, int puntaje, int vidas, int puntosRestantes,
                       PacManDTO pacMan, List<FantasmaDTO> fantasmas, List<String> tablero) {
@@ -49,5 +51,33 @@ public class PartidaDTO {
 
     public List<String> getTablero() {
         return tablero;
+    }
+
+    public void setEstado(EstadoPartida estado) {
+        this.estado = estado;
+    }
+
+    public void setPuntaje(int puntaje) {
+        this.puntaje = puntaje;
+    }
+
+    public void setVidas(int vidas) {
+        this.vidas = vidas;
+    }
+
+    public void setPuntosRestantes(int puntosRestantes) {
+        this.puntosRestantes = puntosRestantes;
+    }
+
+    public void setPacMan(PacManDTO pacMan) {
+        this.pacMan = pacMan;
+    }
+
+    public void setFantasmas(List<FantasmaDTO> fantasmas) {
+        this.fantasmas = List.copyOf(fantasmas);
+    }
+
+    public void setTablero(List<String> tablero) {
+        this.tablero = List.copyOf(tablero);
     }
 }
