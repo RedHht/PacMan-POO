@@ -9,68 +9,67 @@ import modelo.EstadoPartida;
 
 public class ControladorTest {
     public static void main(String[] args) {
-        Controlador controlador = Controlador.getInstance();
-        mostrar("Consultar antes de iniciar", controlador.getPartida());
-        PartidaDTO inicio = controlador.iniciarPartida();
+        mostrar("Consultar antes de iniciar", Controlador.getInstance().getPartida());
+        PartidaDTO inicio = Controlador.getInstance().iniciarPartida();
         mostrar("Iniciar partida", inicio);
         System.out.println("Tablero: # pared, . punto, o superpunto, espacio sin punto");
         for (String fila : inicio.getTablero()) {
             System.out.println(fila);
         }
 
-        probarMovimientoYPausa(controlador);
-        probarSuperPuntoYPared(controlador);
+        probarMovimientoYPausa();
+        probarSuperPuntoYPared();
 
         mostrar("Volver a mostrar la respuesta inicial", inicio);
-        mostrar("Consultar el estado actual", controlador.getPartida());
+        mostrar("Consultar el estado actual", Controlador.getInstance().getPartida());
 
-        probarFinYNuevaPartida(controlador);
+        probarFinYNuevaPartida();
     }
 
-    private static void probarMovimientoYPausa(Controlador controlador) {
+    private static void probarMovimientoYPausa() {
         mostrar("Solicitar izquierda",
-                controlador.moverPacMan(Direccion.IZQUIERDA));
+                Controlador.getInstance().moverPacMan(Direccion.IZQUIERDA));
         mostrar("Actualizar 0.25 segundos: avanza una celda y come un punto",
-                controlador.actualizarPartida(0.25));
-        mostrar("Pausar", controlador.pausarPartida());
+                Controlador.getInstance().actualizarPartida(0.25));
+        mostrar("Pausar", Controlador.getInstance().pausarPartida());
         mostrar("Actualizar durante la pausa: el estado se mantiene",
-                controlador.actualizarPartida(1));
-        mostrar("Reanudar", controlador.reanudarPartida());
+                Controlador.getInstance().actualizarPartida(1));
+        mostrar("Reanudar", Controlador.getInstance().reanudarPartida());
     }
 
-    private static void probarSuperPuntoYPared(Controlador controlador) {
+    private static void probarSuperPuntoYPared() {
         mostrar("Avanzar otras tres celdas a la izquierda",
-                controlador.actualizarPartida(0.75));
-        mostrar("Solicitar abajo", controlador.moverPacMan(Direccion.ABAJO));
+                Controlador.getInstance().actualizarPartida(0.75));
+        mostrar("Solicitar abajo", Controlador.getInstance().moverPacMan(Direccion.ABAJO));
         mostrar("Llegar al superpunto: suma 50 y asusta fantasmas",
-                controlador.actualizarPartida(0.25));
-        mostrar("Pausar con fantasmas asustados", controlador.pausarPartida());
+                Controlador.getInstance().actualizarPartida(0.25));
+        mostrar("Pausar con fantasmas asustados", Controlador.getInstance().pausarPartida());
         mostrar("Actualizar en pausa: tampoco baja el tiempo asustado",
-                controlador.actualizarPartida(0.5));
-        mostrar("Reanudar después del superpunto", controlador.reanudarPartida());
+                Controlador.getInstance().actualizarPartida(0.5));
+        mostrar("Reanudar después del superpunto", Controlador.getInstance().reanudarPartida());
         mostrar("Solicitar izquierda hacia una pared",
-                controlador.moverPacMan(Direccion.IZQUIERDA));
+                Controlador.getInstance().moverPacMan(Direccion.IZQUIERDA));
         mostrar("Actualizar: Pac-Man permanece contra la pared",
-                controlador.actualizarPartida(0.25));
+                Controlador.getInstance().actualizarPartida(0.25));
     }
 
-    private static void probarFinYNuevaPartida(Controlador controlador) {
+    private static void probarFinYNuevaPartida() {
         try {
-            controlador.nuevaPartida();
+            Controlador.getInstance().nuevaPartida();
         } catch (IllegalStateException e) {
             System.out.println("\nNueva partida durante el juego: " + e.getMessage());
         }
 
-        PartidaDTO respuesta = controlador.getPartida();
+        PartidaDTO respuesta = Controlador.getInstance().getPartida();
         for (double tiempo = 0; tiempo < 60 && respuesta.getEstado() == EstadoPartida.EN_CURSO; tiempo += 0.25) {
             int vidasAnteriores = respuesta.getVidas();
-            respuesta = controlador.actualizarPartida(0.25);
+            respuesta = Controlador.getInstance().actualizarPartida(0.25);
             if (respuesta.getVidas() != vidasAnteriores) {
                 mostrar("Colisión: cambia la cantidad de vidas", respuesta);
             }
         }
         mostrar("Estado después de esperar a los fantasmas", respuesta);
-        mostrar("Comenzar una nueva partida", controlador.nuevaPartida());
+        mostrar("Comenzar una nueva partida", Controlador.getInstance().nuevaPartida());
     }
 
     private static void mostrar(String accion, PartidaDTO respuesta) {

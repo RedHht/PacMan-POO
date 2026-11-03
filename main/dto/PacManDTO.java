@@ -3,9 +3,11 @@ package dto;
 import modelo.Direccion;
 
 public class PacManDTO {
-    private final double x;
-    private final double y;
-    private final Direccion direccion;
+    private double x;
+    private double y;
+    private Direccion direccion;
+
+    public PacManDTO() { }
 
     public PacManDTO(double x, double y, Direccion direccion) {
         this.x = x;
@@ -23,5 +25,17 @@ public class PacManDTO {
 
     public Direccion getDireccion() {
         return direccion;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public void setDireccion(Direccion direccion) {
+        this.direccion = direccion;
     }
 }
