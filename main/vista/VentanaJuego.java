@@ -1,4 +1,3 @@
-
 package vista;
 
 import controlador.Controlador;
@@ -11,7 +10,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class VentanaJuego extends JFrame {
+    private static final int INTERVALO_ACTUALIZACION = 40;
+    private static final double SEGUNDOS_POR_ACTUALIZACION = INTERVALO_ACTUALIZACION / 1000.0;
     private final PanelTablero panel;
+    private final JLabel puntaje = new JLabel();
+    private final JLabel vidas = new JLabel();
+    private final JLabel estadoPartida = new JLabel(" ", SwingConstants.CENTER);
     private final Timer timer;
     private final JButton botonReiniciar = new JButton("Volver a jugar");
     private final JLabel ayuda = new JLabel("Presioná una flecha para empezar", SwingConstants.CENTER);
@@ -26,26 +30,11 @@ public class VentanaJuego extends JFrame {
         PartidaDTO datos = Controlador.getInstance().iniciarPartida();
 
         panel = new PanelTablero(datos);
-        JPanel juego = new JPanel(new BorderLayout());
-        juego.add(panel);
-        JPanel controles = new JPanel(new BorderLayout(8, 8));
-        controles.add(ayuda, BorderLayout.CENTER);
-        controles.add(botonReiniciar, BorderLayout.SOUTH);
-        controles.setBorder(BorderFactory.createEmptyBorder(10, 16, 14, 16));
-
-        juego.add(controles, BorderLayout.SOUTH);
-        pantallas.add(crearMenu(), "menu");
-        pantallas.add(juego, "juego");
-        setContentPane(pantallas);
-        tarjetas.show(pantallas, "menu");
-        botonReiniciar.setEnabled(false);
-        botonReiniciar.addActionListener(e -> reiniciarJuego());
-
+        timer = new Timer(INTERVALO_ACTUALIZACION, e -> actualizarJuego());
+        configurarVentana();
+        configurarEventos();
         configurarTeclado();
-
-        // Actualizar el juego cada 40 milisegundos
-        timer = new Timer(40, e -> actualizarJuego());
-        // El primer avance se realiza al recibir la primera flecha.
+        actualizarVista(datos);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
@@ -53,53 +42,82 @@ public class VentanaJuego extends JFrame {
         setLocationRelativeTo(null);
     }
 
+    private void configurarVentana() {
+        JPanel informacion = new JPanel(new FlowLayout());
+        informacion.add(puntaje);
+        informacion.add(vidas);
+
+        JPanel controles = new JPanel(new GridLayout(3, 1, 0, 5));
+        controles.add(estadoPartida);
+        controles.add(ayuda);
+        controles.add(botonReiniciar);
+        controles.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+
+        JPanel juego = new JPanel(new BorderLayout());
+        juego.add(informacion, BorderLayout.NORTH);
+        juego.add(panel, BorderLayout.CENTER);
+        juego.add(controles, BorderLayout.SOUTH);
+        pantallas.add(crearMenu(), "menu");
+        pantallas.add(juego, "juego");
+        setContentPane(pantallas);
+        tarjetas.show(pantallas, "menu");
+        botonReiniciar.setEnabled(false);
+    }
+
+    private void configurarEventos() {
+        botonReiniciar.addActionListener(e -> reiniciarJuego());
+    }
+
     private JPanel crearMenu() {
-        JPanel menu = new JPanel();
-        menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
-        menu.setBorder(BorderFactory.createEmptyBorder(32, 30, 32, 30));
-        menu.add(Box.createVerticalGlue());
-        agregarTexto(menu, "P A C - M A N");
-        menu.add(Box.createVerticalStrut(10));
-        agregarTexto(menu, "EL LABERINTO TE ESPERA");
-        menu.add(Box.createVerticalStrut(38));
-        agregarTexto(menu, "Comé todos los puntos para ganar.");
-        menu.add(Box.createVerticalStrut(12));
-        agregarTexto(menu, "Flechas  ·  Mover a Pac-Man");
-        agregarTexto(menu, "P  ·  Pausar o continuar");
-        menu.add(Box.createVerticalStrut(12));
-        agregarTexto(menu, "Los superpuntos asustan a los fantasmas.");
-        menu.add(Box.createVerticalStrut(32));
+        JPanel menu = new JPanel(new GridLayout(7, 1, 0, 10));
+        menu.setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 20));
+        menu.add(new JLabel("Pac-Man", SwingConstants.CENTER));
+        menu.add(new JLabel("Comé todos los puntos para ganar.", SwingConstants.CENTER));
+        menu.add(new JLabel("Flechas: mover a Pac-Man", SwingConstants.CENTER));
+        menu.add(new JLabel("P: pausar o continuar", SwingConstants.CENTER));
+        menu.add(new JLabel("Los superpuntos asustan a los fantasmas.", SwingConstants.CENTER));
+
         JButton jugar = new JButton("Jugar");
-        jugar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        jugar.addActionListener(e -> {
-            enMenu = false;
-            tarjetas.show(pantallas, "juego");
-            panel.requestFocusInWindow();
-        });
+        jugar.addActionListener(e -> mostrarJuego());
         menu.add(jugar);
-        menu.add(Box.createVerticalStrut(12));
         JButton salir = new JButton("Salir");
-        salir.setAlignmentX(Component.CENTER_ALIGNMENT);
         salir.addActionListener(e -> dispose());
         menu.add(salir);
-        menu.add(Box.createVerticalGlue());
         return menu;
     }
 
-    private void agregarTexto(JPanel destino, String texto) {
-        JLabel etiqueta = new JLabel(texto);
-        etiqueta.setAlignmentX(Component.CENTER_ALIGNMENT);
-        etiqueta.setHorizontalAlignment(SwingConstants.CENTER);
-        etiqueta.setMaximumSize(new Dimension(Integer.MAX_VALUE, etiqueta.getPreferredSize().height + 4));
-        destino.add(etiqueta);
+    private void mostrarJuego() {
+        enMenu = false;
+        tarjetas.show(pantallas, "juego");
+        panel.requestFocusInWindow();
+    }
+
+    private void actualizarVista(PartidaDTO datos) {
+        panel.actualizarPartida(datos);
+        puntaje.setText("Puntos: " + datos.getPuntaje());
+        vidas.setText("Vidas: " + datos.getVidas());
+        switch (datos.getEstado()) {
+            case EN_CURSO:
+                estadoPartida.setText("En curso");
+                break;
+            case EN_PAUSA:
+                estadoPartida.setText("Pausa");
+                break;
+            case GANADA:
+                estadoPartida.setText("¡Ganaste!");
+                break;
+            case PERDIDA:
+                estadoPartida.setText("Fin del juego");
+                break;
+        }
     }
 
     private void actualizarJuego() {
         if (!juegoIniciado || Controlador.getInstance().getPartida().getEstado() != EstadoPartida.EN_CURSO) {
             return;
         }
-        PartidaDTO datosActualizados = Controlador.getInstance().actualizarPartida(0.04);
-        panel.actualizarPartida(datosActualizados);
+        PartidaDTO datosActualizados = Controlador.getInstance().actualizarPartida(SEGUNDOS_POR_ACTUALIZACION);
+        actualizarVista(datosActualizados);
         if (datosActualizados.getEstado() == EstadoPartida.GANADA
                 || datosActualizados.getEstado() == EstadoPartida.PERDIDA) {
             timer.stop();
@@ -115,10 +133,10 @@ public class VentanaJuego extends JFrame {
         EstadoPartida estado = Controlador.getInstance().getPartida().getEstado();
         if (estado == EstadoPartida.EN_CURSO) {
             timer.stop();
-            panel.actualizarPartida(Controlador.getInstance().pausarPartida());
+            actualizarVista(Controlador.getInstance().pausarPartida());
             ayuda.setText("Presioná P para continuar");
         } else if (estado == EstadoPartida.EN_PAUSA) {
-            panel.actualizarPartida(Controlador.getInstance().reanudarPartida());
+            actualizarVista(Controlador.getInstance().reanudarPartida());
             ayuda.setText("Flechas: mover  |  P: pausar");
             timer.start();
         }
@@ -130,7 +148,7 @@ public class VentanaJuego extends JFrame {
             return;
         }
         timer.stop();
-        panel.actualizarPartida(Controlador.getInstance().nuevaPartida());
+        actualizarVista(Controlador.getInstance().nuevaPartida());
         juegoIniciado = false;
         botonReiniciar.setEnabled(false);
         ayuda.setText("Presioná una flecha para empezar");
@@ -150,40 +168,51 @@ public class VentanaJuego extends JFrame {
         // Al soltar P se alterna una sola vez, aunque se mantenga presionada.
         panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
                 .put(KeyStroke.getKeyStroke("released P"), "pausar");
-        panel.getActionMap().put("pausar", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                alternarPausa();
-            }
-        });
+        panel.getActionMap().put("pausar", new AccionPausa());
     }
 
     private void asignarTecla(String tecla, Direccion direccion) {
-
         String nombreAccion = "mover_" + direccion.name();
-
         panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
                 .put(KeyStroke.getKeyStroke(tecla), nombreAccion);
+        panel.getActionMap().put(nombreAccion, new AccionMovimiento(direccion));
+    }
 
-        panel.getActionMap().put(nombreAccion, new AbstractAction() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (enMenu || Controlador.getInstance().getPartida().getEstado() != EstadoPartida.EN_CURSO) {
-                    return;
-                }
-                Controlador.getInstance().moverPacMan(direccion);
-                if (!juegoIniciado) {
-                    juegoIniciado = true;
-                    ayuda.setText("Flechas: mover  |  P: pausar");
-                    // Guardar la direccion antes de avanzar evita perder la primera tecla.
-                    actualizarJuego();
-                    if (Controlador.getInstance().getPartida().getEstado() == EstadoPartida.EN_CURSO) {
-                        timer.start();
-                    }
-                }
+    private void moverPacMan(Direccion direccion) {
+        if (enMenu || Controlador.getInstance().getPartida().getEstado() != EstadoPartida.EN_CURSO) {
+            return;
+        }
+        Controlador.getInstance().moverPacMan(direccion);
+        if (!juegoIniciado) {
+            juegoIniciado = true;
+            ayuda.setText("Flechas: mover  |  P: pausar");
+            // Registrar la dirección antes de avanzar conserva la primera tecla.
+            actualizarJuego();
+            if (Controlador.getInstance().getPartida().getEstado() == EstadoPartida.EN_CURSO) {
+                timer.start();
             }
-        });
+        }
+    }
+
+    // Las acciones se registran para toda la ventana, incluso si un botón tiene el foco.
+    private class AccionMovimiento extends AbstractAction {
+        private final Direccion direccion;
+
+        public AccionMovimiento(Direccion direccion) {
+            this.direccion = direccion;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            moverPacMan(direccion);
+        }
+    }
+
+    private class AccionPausa extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            alternarPausa();
+        }
     }
 
     public static void main(String[] args) {
