@@ -7,17 +7,19 @@ public class Laberinto {
 
     // NOTA: En este mapa un "#" es una pared, un "." es un punto común y un "o" es un super punto
     private static final String[] MAPA_PREDETERMINADO = {
-        "###########",
-        "#o..#....o#",
-        "#.#.#.###.#",
-        "#.#...#...#",
-        "#...#...#.#",
-        "###...#...#",
-        "#...#...#.#",
-        "#.###.###.#",
-        "#.....#...#",
-        "#o#####.#o#",
-        "###########"
+        "###############",
+        "#o...........o#",
+        "#.###.#.#.###.#",
+        "#.....#.#.....#",
+        "#.###.#.#.###.#",
+        "#...#.....#...#",
+        "###.#.###.#.###",
+        "#...#.....#...#",
+        "#.###.#.#.###.#",
+        "#...#.....#...#",
+        "#.#.###.###.#.#",
+        "#o...........o#",
+        "###############"
     };
 
     private final Celda[][] celdas;
@@ -35,10 +37,10 @@ public class Laberinto {
                 char simbolo = filas[y].charAt(x);
                 Celda celda = new Celda(simbolo != '#');
                 if (simbolo == '.') {
-                    celda.colocarPunto(new PuntoComun());
+                    celda.colocarPunto(Punto.COMUN);
                     puntosRestantes++;
                 } else if (simbolo == 'o') {
-                    celda.colocarPunto(new SuperPunto());
+                    celda.colocarPunto(Punto.SUPER);
                     puntosRestantes++;
                 }
                 celdas[y][x] = celda;
@@ -56,7 +58,7 @@ public class Laberinto {
                     fila.append('#');
                 } else if (!celda.tienePunto()) {
                     fila.append(' ');
-                } else if (celda.getPunto().obtenerValor() == 50) {
+                } else if (celda.getPunto() == Punto.SUPER) {
                     fila.append('o');
                 } else {
                     fila.append('.');

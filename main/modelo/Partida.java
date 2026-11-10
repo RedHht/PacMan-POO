@@ -20,9 +20,9 @@ public class Partida {
     private int vidas = 3;
 
     public Partida() {
-        this(new Laberinto(), new Posicion(5, 8),
-                List.of(new Posicion(5, 5), new Posicion(4, 5),
-                        new Posicion(3, 5), new Posicion(5, 4)));
+        this(new Laberinto(), new Posicion(7, 11),
+                List.of(new Posicion(7, 5), new Posicion(6, 5),
+                        new Posicion(8, 5), new Posicion(7, 4)));
     }
 
     public Partida(Laberinto laberinto, Posicion inicioPacMan,
@@ -141,7 +141,7 @@ public class Partida {
 
         puntaje += punto.obtenerValor();
 
-        if (punto.obtenerValor() == 50) { // Si el punto vale 50 es super punto y se asustan los fantasmas
+        if (punto == Punto.SUPER) {
             for (Fantasma fantasma : fantasmas) {
                 fantasma.asustar(DURACION_ASUSTADO);
             }

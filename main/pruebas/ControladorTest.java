@@ -6,8 +6,10 @@ import dto.PartidaDTO;
 import dto.PacManDTO;
 import modelo.Direccion;
 import modelo.EstadoPartida;
+import modelo.Personaje;
 
 public class ControladorTest {
+    private static final double TIEMPO_POR_CELDA = 1.0 / Personaje.VELOCIDAD;
     public static void main(String[] args) {
         mostrar("Consultar antes de iniciar", Controlador.getInstance().getPartida());
         PartidaDTO inicio = Controlador.getInstance().iniciarPartida();
@@ -29,8 +31,8 @@ public class ControladorTest {
     private static void probarMovimientoYPausa() {
         mostrar("Solicitar izquierda",
                 Controlador.getInstance().moverPacMan(Direccion.IZQUIERDA));
-        mostrar("Actualizar 0.25 segundos: avanza una celda y come un punto",
-                Controlador.getInstance().actualizarPartida(0.25));
+        mostrar("Avanzar una celda y comer un punto",
+                Controlador.getInstance().actualizarPartida(TIEMPO_POR_CELDA));
         mostrar("Pausar", Controlador.getInstance().pausarPartida());
         mostrar("Actualizar durante la pausa: el estado se mantiene",
                 Controlador.getInstance().actualizarPartida(1));
@@ -38,11 +40,8 @@ public class ControladorTest {
     }
 
     private static void probarSuperPuntoYPared() {
-        mostrar("Avanzar otras tres celdas a la izquierda",
-                Controlador.getInstance().actualizarPartida(0.75));
-        mostrar("Solicitar abajo", Controlador.getInstance().moverPacMan(Direccion.ABAJO));
-        mostrar("Llegar al superpunto: suma 50 y asusta fantasmas",
-                Controlador.getInstance().actualizarPartida(0.25));
+        mostrar("Avanzar otras cinco celdas a la izquierda hasta el superpunto: suma 90 y asusta fantasmas",
+                Controlador.getInstance().actualizarPartida(5 * TIEMPO_POR_CELDA));
         mostrar("Pausar con fantasmas asustados", Controlador.getInstance().pausarPartida());
         mostrar("Actualizar en pausa: tampoco baja el tiempo asustado",
                 Controlador.getInstance().actualizarPartida(0.5));
@@ -50,7 +49,7 @@ public class ControladorTest {
         mostrar("Solicitar izquierda hacia una pared",
                 Controlador.getInstance().moverPacMan(Direccion.IZQUIERDA));
         mostrar("Actualizar: Pac-Man permanece contra la pared",
-                Controlador.getInstance().actualizarPartida(0.25));
+                Controlador.getInstance().actualizarPartida(TIEMPO_POR_CELDA));
     }
 
     private static void probarFinYNuevaPartida() {

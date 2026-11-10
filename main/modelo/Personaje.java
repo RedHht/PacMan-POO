@@ -1,7 +1,7 @@
 package modelo;
 
 public abstract class Personaje {
-    public static final double VELOCIDAD = 4.0;
+    public static final double VELOCIDAD = 3.0;
     private Posicion destino;
     private Posicion posicion;
     private final Posicion posicionInicial;
