@@ -7,7 +7,8 @@ import modelo.EstadoPartida;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 public class VentanaJuego extends JFrame {
     private static final int INTERVALO_ACTUALIZACION = 40;
@@ -39,7 +40,6 @@ public class VentanaJuego extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         pack();
-        setLocationRelativeTo(null);
     }
 
     private void configurarVentana() {
@@ -57,11 +57,15 @@ public class VentanaJuego extends JFrame {
         juego.add(informacion, BorderLayout.NORTH);
         juego.add(panel, BorderLayout.CENTER);
         juego.add(controles, BorderLayout.SOUTH);
+
         pantallas.add(crearMenu(), "menu");
         pantallas.add(juego, "juego");
         setContentPane(pantallas);
         tarjetas.show(pantallas, "menu");
+
         botonReiniciar.setEnabled(false);
+        // El teclado queda en el tablero; el botón sigue funcionando con el mouse.
+        botonReiniciar.setFocusable(false);
     }
 
     private void configurarEventos() {
@@ -81,7 +85,10 @@ public class VentanaJuego extends JFrame {
         jugar.addActionListener(e -> mostrarJuego());
         menu.add(jugar);
         JButton salir = new JButton("Salir");
-        salir.addActionListener(e -> dispose());
+        salir.addActionListener(e -> {
+            timer.stop();
+            dispose();
+        });
         menu.add(salir);
         return menu;
     }
@@ -152,30 +159,12 @@ public class VentanaJuego extends JFrame {
         juegoIniciado = false;
         botonReiniciar.setEnabled(false);
         ayuda.setText("Presioná una flecha para empezar");
-    }
-
-    @Override
-    public void dispose() {
-        timer.stop();
-        super.dispose();
+        panel.requestFocusInWindow();
     }
 
     private void configurarTeclado() {
-        asignarTecla("UP", Direccion.ARRIBA);
-        asignarTecla("DOWN", Direccion.ABAJO);
-        asignarTecla("LEFT", Direccion.IZQUIERDA);
-        asignarTecla("RIGHT", Direccion.DERECHA);
-        // Al soltar P se alterna una sola vez, aunque se mantenga presionada.
-        panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-                .put(KeyStroke.getKeyStroke("released P"), "pausar");
-        panel.getActionMap().put("pausar", new AccionPausa());
-    }
-
-    private void asignarTecla(String tecla, Direccion direccion) {
-        String nombreAccion = "mover_" + direccion.name();
-        panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-                .put(KeyStroke.getKeyStroke(tecla), nombreAccion);
-        panel.getActionMap().put(nombreAccion, new AccionMovimiento(direccion));
+        panel.setFocusable(true);
+        panel.addKeyListener(new ManejoTeclado());
     }
 
     private void moverPacMan(Direccion direccion) {
@@ -194,31 +183,41 @@ public class VentanaJuego extends JFrame {
         }
     }
 
-    // Las acciones se registran para toda la ventana, incluso si un botón tiene el foco.
-    private class AccionMovimiento extends AbstractAction {
-        private final Direccion direccion;
-
-        public AccionMovimiento(Direccion direccion) {
-            this.direccion = direccion;
+    private class ManejoTeclado implements KeyListener {
+        @Override
+        public void keyPressed(KeyEvent e) {
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_UP:
+                    moverPacMan(Direccion.ARRIBA);
+                    break;
+                case KeyEvent.VK_DOWN:
+                    moverPacMan(Direccion.ABAJO);
+                    break;
+                case KeyEvent.VK_LEFT:
+                    moverPacMan(Direccion.IZQUIERDA);
+                    break;
+                case KeyEvent.VK_RIGHT:
+                    moverPacMan(Direccion.DERECHA);
+                    break;
+            }
         }
 
         @Override
-        public void actionPerformed(ActionEvent e) {
-            moverPacMan(direccion);
+        public void keyReleased(KeyEvent e) {
+            // Al soltar P se alterna una vez, aunque se mantenga presionada.
+            if (e.getKeyCode() == KeyEvent.VK_P) {
+                alternarPausa();
+            }
         }
-    }
 
-    private class AccionPausa extends AbstractAction {
         @Override
-        public void actionPerformed(ActionEvent e) {
-            alternarPausa();
+        public void keyTyped(KeyEvent e) {
+            // NOOP
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new VentanaJuego().setVisible(true);
-        });
+        new VentanaJuego().setVisible(true);
     }
 }
 
