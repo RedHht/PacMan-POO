@@ -60,48 +60,19 @@ public class Fantasma extends Personaje {
         }
     }
 
-    public void actualizar(Laberinto laberinto, Posicion posicionPacMan, double deltaTiempo) {
+    public void actualizar(double deltaTiempo) {
 
         actualizarTiempo(deltaTiempo);
-        objetivoPacMan = new Posicion(Math.round(posicionPacMan.getX()),
-                Math.round(posicionPacMan.getY()));
 
         if (estaRegresando() && getPosicion().equals(getPosicionInicial())) {
             estado = EstadoFantasma.NORMAL;
             return;
         }
-        desplazar(laberinto, deltaTiempo);
         if (estaRegresando() && getPosicion().equals(getPosicionInicial())) {
             estado = EstadoFantasma.NORMAL;
         }
-    }
 
-    @Override
-    protected Direccion elegirDireccion(Laberinto laberinto) {
-        List<Direccion> disponibles = laberinto.direccionesDisponibles(getPosicion());
-        if (disponibles.isEmpty()) {
-            return null;
-        }
-        if (estaAsustado()) {
-            return disponibles.get(aleatorio.nextInt(disponibles.size()));
-        }
-
-        Posicion objetivo = objetivoPacMan;
-        if (estaRegresando()) {
-            objetivo = getPosicionInicial();
-        }
-
-        Direccion elegida = disponibles.get(0);
-        int menorDistancia = Integer.MAX_VALUE;
-        for (Direccion direccion : disponibles) {
-            Posicion siguiente = getPosicion().avanzar(direccion);
-            int distancia = laberinto.distanciaMinima(siguiente, objetivo);
-            if (distancia < menorDistancia) {
-                menorDistancia = distancia;
-                elegida = direccion;
-            }
-        }
-        return elegida;
+        desplazar(deltaTiempo);
     }
 
     @Override

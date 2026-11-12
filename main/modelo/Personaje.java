@@ -26,12 +26,9 @@ public abstract class Personaje {
         this.posicion = posicion;
     }
 
-    protected void cambiarDireccion(Direccion direccion) {
+    public void cambiarDireccion(Direccion direccion) {
         direccionActual = direccion;
     }
-
-    // Abstracta para que cada implementación de Personaje pueda decidir como direccionar
-    protected abstract Direccion elegirDireccion(Laberinto laberinto);
 
     public double tiempoHastaCentro() {
         if (destino == null) {
@@ -40,16 +37,10 @@ public abstract class Personaje {
         return posicion.distanciaA(destino) / VELOCIDAD;
     }
 
-    protected void desplazar(Laberinto laberinto, double deltaTiempo) {
+    protected void desplazar(double deltaTiempo) {
 
-        // Si no tengo destino elijo uno nuevo basado en la dirección
         if (destino == null) {
-            Direccion direccion = elegirDireccion(laberinto);
-            if (!laberinto.puedeMover(posicion, direccion)) {
-                return;
-            }
-            cambiarDireccion(direccion);
-            destino = posicion.avanzar(direccion);
+            return;
         }
 
         double avance = VELOCIDAD * deltaTiempo;
@@ -86,5 +77,21 @@ public abstract class Personaje {
         destino = null;
         posicion = posicionInicial;
         direccionActual = null;
+    }
+
+    public Posicion getDestino() {
+        return destino;
+    }
+
+    public void setDestino(Posicion destino) {
+        this.destino = destino;
+    }
+
+    public void setPosicion(Posicion posicion) {
+        this.posicion = posicion;
+    }
+
+    public void setDireccionActual(Direccion direccionActual) {
+        this.direccionActual = direccionActual;
     }
 }

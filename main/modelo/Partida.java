@@ -5,6 +5,7 @@ import dto.FantasmaDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Partida {
 
@@ -91,6 +92,70 @@ public class Partida {
         }
     }
 
+    public Direccion elegirDireccionPacman() {
+        if (pacMan.getDireccionSolicitada() != null && laberinto.puedeMover(pacMan.getPosicion(), pacMan.getDireccionSolicitada())) {
+            pacMan.cambiarDireccion(pacMan.getDireccionSolicitada());
+            pacMan.setDireccionSolicitada(null);
+        }
+        return pacMan.getDireccionActual();
+    }
+
+    public void desplazarPacman() {
+        if (pacMan.getDestino() == null) {
+            Direccion direccion = elegirDireccionPacman();
+
+            if (!laberinto.puedeMover(pacMan.getPosicion(), direccion)) {
+                return;
+            }
+
+            pacMan.cambiarDireccion(direccion);
+            pacMan.setDestino(pacMan.getPosicion().avanzar(direccion));;
+        }
+    }
+
+    public Direccion elegirDireccionFantasma(Fantasma fantasma) {
+
+        Random aleatorio = new Random();
+        List<Direccion> disponibles = laberinto.direccionesDisponibles(fantasma.getPosicion());
+        if (disponibles.isEmpty()) {
+            return null;
+        }
+        if (fantasma.estaAsustado()) {
+            return disponibles.get(aleatorio.nextInt(disponibles.size()));
+        }
+
+        Posicion objetivo = new Posicion(Math.round(pacMan.getPosicion().getX()),
+                Math.round(pacMan.getPosicion().getY()));
+
+        if (fantasma.estaRegresando()) {
+            objetivo = fantasma.getPosicionInicial();
+        }
+
+        Direccion elegida = disponibles.get(0);
+        int menorDistancia = Integer.MAX_VALUE;
+        for (Direccion direccion : disponibles) {
+            Posicion siguiente = fantasma.getPosicion().avanzar(direccion);
+            int distancia = laberinto.distanciaMinima(siguiente, objetivo);
+            if (distancia < menorDistancia) {
+                menorDistancia = distancia;
+                elegida = direccion;
+            }
+        }
+        return elegida;
+    }
+
+    public void desplazarFantasma(Fantasma fantasma) {
+        if (fantasma.getDestino() == null) {
+            Direccion direccion = elegirDireccionFantasma(fantasma);
+            if (!laberinto.puedeMover(fantasma.getPosicion(), direccion)) {
+                return;
+            }
+            fantasma.cambiarDireccion(direccion);
+            Posicion destino = fantasma.getPosicion().avanzar(direccion);
+            fantasma.setDestino(fantasma.getPosicion().avanzar(direccion));;
+        }
+    }
+
     // En el futuro esto va a ser llamado de forma regular por un timer.
     public void actualizar(double deltaTiempo) {
         double restante = deltaTiempo;
@@ -107,13 +172,15 @@ public class Partida {
 
             // Para cada pedazo de tiempo que tomamos, calculamos colisiones, consumo, etc.
             Posicion anteriorPacMan = pacMan.getPosicion();
-            pacMan.actualizar(laberinto, tramo);
+            desplazarPacman();
+            pacMan.actualizar(tramo);
             consumirPunto();
             boolean vidaPerdida = false;
             for (Fantasma fantasma : fantasmas) {
                 Posicion anteriorFantasma = fantasma.getPosicion();
                 boolean regresando = fantasma.estaRegresando();
-                fantasma.actualizar(laberinto, pacMan.getPosicion(), tramo);
+                desplazarFantasma(fantasma);
+                fantasma.actualizar(tramo);
                 if (!regresando && resolverColision(fantasma, anteriorPacMan, anteriorFantasma)) {
                     vidaPerdida = true;
                     break;
