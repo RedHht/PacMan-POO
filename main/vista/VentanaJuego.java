@@ -64,7 +64,7 @@ public class VentanaJuego extends JFrame {
         tarjetas.show(pantallas, "menu");
 
         botonReiniciar.setEnabled(false);
-        // El teclado queda en el tablero; el botón sigue funcionando con el mouse.
+        // El teclado queda en el tablero; el boton sigue funcionando con el mouse.
         botonReiniciar.setFocusable(false);
     }
 
@@ -73,23 +73,29 @@ public class VentanaJuego extends JFrame {
     }
 
     private JPanel crearMenu() {
-        JPanel menu = new JPanel(new GridLayout(7, 1, 0, 10));
-        menu.setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 20));
-        menu.add(new JLabel("Pac-Man", SwingConstants.CENTER));
-        menu.add(new JLabel("Comé todos los puntos para ganar.", SwingConstants.CENTER));
-        menu.add(new JLabel("Flechas: mover a Pac-Man", SwingConstants.CENTER));
-        menu.add(new JLabel("P: pausar o continuar", SwingConstants.CENTER));
-        menu.add(new JLabel("Los superpuntos asustan a los fantasmas.", SwingConstants.CENTER));
+        JPanel menu = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 80));
+        JPanel contenido = new JPanel(new BorderLayout(0, 24));
+        contenido.add(new JLabel("Pac-Man", SwingConstants.CENTER), BorderLayout.NORTH);
 
+        JPanel instrucciones = new JPanel(new GridLayout(4, 1, 0, 8));
+        instrucciones.add(new JLabel("Comé todos los puntos para ganar.", SwingConstants.CENTER));
+        instrucciones.add(new JLabel("Flechas: mover a Pac-Man", SwingConstants.CENTER));
+        instrucciones.add(new JLabel("P: pausar o continuar", SwingConstants.CENTER));
+        instrucciones.add(new JLabel("Los superpuntos asustan a los fantasmas.", SwingConstants.CENTER));
+        contenido.add(instrucciones, BorderLayout.CENTER);
+
+        JPanel botones = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 0));
         JButton jugar = new JButton("Jugar");
         jugar.addActionListener(e -> mostrarJuego());
-        menu.add(jugar);
+        botones.add(jugar);
         JButton salir = new JButton("Salir");
         salir.addActionListener(e -> {
             timer.stop();
             dispose();
         });
-        menu.add(salir);
+        botones.add(salir);
+        contenido.add(botones, BorderLayout.SOUTH);
+        menu.add(contenido);
         return menu;
     }
 
@@ -105,7 +111,11 @@ public class VentanaJuego extends JFrame {
         vidas.setText("Vidas: " + datos.getVidas());
         switch (datos.getEstado()) {
             case EN_CURSO:
-                estadoPartida.setText("En curso");
+                if (juegoIniciado) {
+                    estadoPartida.setText("En curso");
+                } else {
+                    estadoPartida.setText(" ");
+                }
                 break;
             case EN_PAUSA:
                 estadoPartida.setText("Pausa");
@@ -155,8 +165,8 @@ public class VentanaJuego extends JFrame {
             return;
         }
         timer.stop();
-        actualizarVista(Controlador.getInstance().nuevaPartida());
         juegoIniciado = false;
+        actualizarVista(Controlador.getInstance().nuevaPartida());
         botonReiniciar.setEnabled(false);
         ayuda.setText("Presioná una flecha para empezar");
         panel.requestFocusInWindow();
