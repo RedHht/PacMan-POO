@@ -88,12 +88,6 @@ public class VentanaJuego extends JFrame {
         JButton jugar = new JButton("Jugar");
         jugar.addActionListener(e -> mostrarJuego());
         botones.add(jugar);
-        JButton salir = new JButton("Salir");
-        salir.addActionListener(e -> {
-            timer.stop();
-            dispose();
-        });
-        botones.add(salir);
         contenido.add(botones, BorderLayout.SOUTH);
         menu.add(contenido);
         return menu;
